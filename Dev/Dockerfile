@@ -2,8 +2,6 @@ FROM nvidia/cuda:8.0-cudnn6-devel
 
 MAINTAINER Sun Keun Choi <sunkeun.choi@gmail.com>
 
-ENV TERM=xterm-256color
-
 # Install Build Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -77,23 +75,5 @@ RUN mkdir /bazel && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
 
-RUN git clone https://github.com/tensorflow/tensorflow.git
-ENV TF_NEED_CUDA 1
-#ENV TF_CUDA_COMPUTE_CAPABILITIES 3.7
-ENV TF_NEED_GCP 0
-ENV TF_NEED_HDFS 0
-ENV TF_NEED_JEMALLOC 1
-ENV TF_NEED_OPENCL 0
-ENV TF_CUDA_CLANG 0
-ENV TF_NEED_MKL 0
-ENV TF_ENABLE_XLA 0
-#ENV PYTHON_BIN_PATH /usr/bin/python3
-ENV PYTHON_BIN_PATH $(which python3)
-#ENV PYTHON_LIB_PATH /usr/lib/python3/dist-packages
-ENV PYTHON_LIB_PATH $PYTHON_BIN_PATH/dist-packages
-ENV TF_CUDA_VERSION $(echo $CUDA_VERSION | awk -F . '{print $1"."$2}')
-ENV TF_CUDNN_VERSION $CUDNN_VERSION
-ENV CUDA_TOOLKIT_PATH /usr/local/cuda
-ENV CUDNN_INSTALL_PATH /usr/local/cuda-$TF_CUDA_VERSION
-ENV CC_OPT_FLAGS -march="broadwell"
+RUN git clone --recurse-submodules https://github.com/tensorflow/tensorflow.git
 WORKDIR /tensorflow
