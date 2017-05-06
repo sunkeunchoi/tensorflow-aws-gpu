@@ -2,6 +2,7 @@ FROM tensorflow/tensorflow:latest-devel-gpu-py3
 
 MAINTAINER Sun Keun Choi <sunkeun.choi@gmail.com>
 
+RUN mkdir -p /tmp/cudnn5
 WORKDIR /tensorflow
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_COMPUTE_CAPABILITIES 3.7
