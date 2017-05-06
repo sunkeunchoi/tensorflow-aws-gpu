@@ -2,6 +2,8 @@ FROM nvidia/cuda:8.0-cudnn6-devel
 
 MAINTAINER Sun Keun Choi <sunkeun.choi@gmail.com>
 
+ENV TERM=xterm-256color
+
 # Install Build Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -27,7 +29,7 @@ RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
     python3 get-pip.py && \
     rm get-pip.py
 
-RUN pip --no-cache-dir --upgrade install \
+RUN pip --no-cache-dir install --upgrade \
         six \
         werkzeug \
         bleach \
@@ -68,16 +70,16 @@ ENV BAZEL_VERSION 0.4.5
 WORKDIR /
 RUN mkdir /bazel && \
     cd /bazel && \
-    curl -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
-    curl -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE.txt && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
     chmod +x bazel-*.sh && \
     ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
 
-RUN git clone https://github.com/tensorflow/tensorflow.git && cd tensorflow
+RUN git clone https://github.com/tensorflow/tensorflow.git
 ENV TF_NEED_CUDA 1
-ENV TF_CUDA_COMPUTE_CAPABILITIES 3.7
+#ENV TF_CUDA_COMPUTE_CAPABILITIES 3.7
 ENV TF_NEED_GCP 0
 ENV TF_NEED_HDFS 0
 ENV TF_NEED_JEMALLOC 1
@@ -85,11 +87,13 @@ ENV TF_NEED_OPENCL 0
 ENV TF_CUDA_CLANG 0
 ENV TF_NEED_MKL 0
 ENV TF_ENABLE_XLA 0
-ENV PYTHON_BIN_PATH /usr/bin/python3
-ENV PYTHON_LIB_PATH /usr/lib/python3/dist-packages
+#ENV PYTHON_BIN_PATH /usr/bin/python3
+ENV PYTHON_BIN_PATH $(which python3)
+#ENV PYTHON_LIB_PATH /usr/lib/python3/dist-packages
+ENV PYTHON_LIB_PATH $PYTHON_BIN_PATH/dist-packages
 ENV TF_CUDA_VERSION $(echo $CUDA_VERSION | awk -F . '{print $1"."$2}')
 ENV TF_CUDNN_VERSION $CUDNN_VERSION
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CUDNN_INSTALL_PATH /usr/local/cuda-$TF_CUDA_VERSION
-
+ENV CC_OPT_FLAGS=-march broadwell
 WORKDIR /tensorflow
