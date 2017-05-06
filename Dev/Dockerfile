@@ -95,5 +95,5 @@ ENV TF_CUDA_VERSION $(echo $CUDA_VERSION | awk -F . '{print $1"."$2}')
 ENV TF_CUDNN_VERSION $CUDNN_VERSION
 ENV CUDA_TOOLKIT_PATH /usr/local/cuda
 ENV CUDNN_INSTALL_PATH /usr/local/cuda-$TF_CUDA_VERSION
-ENV CC_OPT_FLAGS=-march broadwell
+ENV CC_OPT_FLAGS -march="broadwell"
 WORKDIR /tensorflow
