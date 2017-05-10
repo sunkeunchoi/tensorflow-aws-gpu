@@ -37,5 +37,5 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 RUN pip --no-cache-dir install \
     numpy 
 
-RUN cd / && git clone https://github.com/tensorflow/tensorflow
+RUN cd / && git clone --recurse-submodules https://github.com/tensorflow/tensorflow
 WORKDIR /tensorflow
