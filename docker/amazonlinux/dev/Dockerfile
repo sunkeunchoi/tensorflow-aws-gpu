@@ -1,27 +1,5 @@
-FROM amazonlinux
-## START OF CUDA RUN TIME
-RUN NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5 && \
-    curl -fsSL http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/7fa2af80.pub | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA && \
-    echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict -
-
-RUN echo $'[cuda]\nname=cuda\nbaseurl=http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA\n' >> /etc/yum.repos.d/cuda.repo
-
-ENV CUDA_VERSION 8.0.61
-
-ENV CUDA_PKG_VERSION 8-0-$CUDA_VERSION-1
-RUN yum install -y \
-        cuda-nvrtc-$CUDA_PKG_VERSION \
-        cuda-nvgraph-$CUDA_PKG_VERSION \
-        cuda-cusolver-$CUDA_PKG_VERSION \
-        cuda-cublas-8-0-8.0.61.1-1 \
-        cuda-cufft-$CUDA_PKG_VERSION \
-        cuda-curand-$CUDA_PKG_VERSION \
-        cuda-cusparse-$CUDA_PKG_VERSION \
-        cuda-npp-$CUDA_PKG_VERSION \
-        cuda-cudart-$CUDA_PKG_VERSION && \
-    ln -s cuda-8.0 /usr/local/cuda && \
-    rm -rf /var/cache/yum/*
-
+FROM sunkeun/tensorflow-aws-gpu:cuda-runtime
+## START OF CUDA DEV
 RUN yum install -y \
         cuda-core-$CUDA_PKG_VERSION \
         cuda-misc-headers-$CUDA_PKG_VERSION \
@@ -40,12 +18,13 @@ RUN yum install -y \
         cuda-driver-dev-$CUDA_PKG_VERSION && \
     rm -rf /var/cache/yum/*
 
-RUN echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \
+ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs:${LIBRARY_PATH}
+## END OF CUDA DEV
+ENV CUDNN_VERSION 6.0.21
+
+RUN CUDNN_DOWNLOAD_SUM=9b09110af48c9a4d7b6344eb4b3e344daa84987ed6177d5c44319732f3bb7f9c && \
+    curl -fsSL http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/cudnn-8.0-linux-x64-v6.0.tgz -O && \
+    echo "$CUDNN_DOWNLOAD_SUM  cudnn-8.0-linux-x64-v6.0.tgz" | sha256sum -c - && \
+    tar --no-same-owner -xzf cudnn-8.0-linux-x64-v6.0.tgz -C /usr/local && \
+    rm cudnn-8.0-linux-x64-v6.0.tgz && \
     ldconfig
-
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
-ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
-## END OF CUDA RUNTIME
