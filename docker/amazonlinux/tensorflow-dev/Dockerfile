@@ -29,6 +29,7 @@ RUN mkdir /bazel && \
 ### START OF TENSORFLOW INSTALL
 RUN yum update -y && yum install -y \
     python35-devel \
+    patch \
     git && \
     rm -rf /var/cache/yum/*
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
